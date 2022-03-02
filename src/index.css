@@ -11,3 +11,39 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.node {
+  display: block;
+  border: 1px solid black;
+  padding: 1em;
+  margin: 1em;
+  border-radius: 5px;
+}
+
+.popup-container {
+  position: relative;
+  display: inline-block;
+}
+
+.popup-anchor {
+  cursor: pointer;
+}
+
+.popup-content {
+  display: none;
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  border-radius: 5px;
+  padding: 1em;
+  z-index: 1;
+  width: 10em;
+}
+
+.popup-to-left {
+  right: 0
+}
+
+.popup-container:hover .popup-content {
+  display: block;
+}
