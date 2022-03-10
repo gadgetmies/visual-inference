@@ -1,9 +1,13 @@
-import {Link} from "react-router-dom";
-import Info from './Info.js'
+import { Link } from "react-router-dom";
 
-export default function NodeLink({id, title, description, popupPosition}) {
-  return <div key={id} className='node'>
-    <Link to={`/${id}`}>{title}</Link>&nbsp;
-    {description ? <Info text={description} popupPosition={popupPosition} /> : null}
-  </div>
+export default function NodeLink({
+  id,
+  title,
+  style
+}) {
+  return (
+    <div key={id} className="node" id={`node-${id}`} style={style}>
+      <Link to={`/${id}`}>{title}</Link>
+    </div>
+  );
 }

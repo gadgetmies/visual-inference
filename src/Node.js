@@ -1,32 +1,52 @@
-import {useParams} from "react-router-dom"
-import graph from './graph.js'
-import * as R from 'ramda'
-import NodeLink from './NodeLink.js';
+import { useParams } from "react-router-dom";
+import graph from "./graph.js";
+import * as R from "ramda";
+import Related, { Directions } from "./Related";
 
-export default function Node() {
-  const nodeId = parseInt(useParams()?.nodeId, 10)
-  const node = graph.find(R.propEq('id', nodeId || 0))
-  const dependencies = graph.filter(({id}) => node.dependencies.some(R.propEq('id', id)))
-  const provides = graph.filter(({dependencies}) => dependencies.some(R.propEq('id', node.id)))
-  console.log({nodeId, node, dependencies, provides})
+export default function Node({ sourceLevels = 1, targetLevels = 1 }) {
+  const nodeId = parseInt(useParams()?.nodeId, 10);
+  const node = graph.nodes.find(R.propEq("id", nodeId || 0));
 
-  return <div style={{display: 'flex', flexDirection: 'row'}}>
-    <div style={{display: 'inline-block', flex: 1}}>
-      {
-        dependencies.map(({id, title}) =>
-          <NodeLink key={id} id={id} title={title}
-                    description={node.dependencies.find(R.propEq('id', id)).description}/>)
-      }
+  return (
+    <div style={{ display: "flex", flexDirection: "row" }}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+        }}
+      >
+        <Related
+          nodeId={nodeId}
+          levels={sourceLevels}
+          direction={Directions.sources}
+          graph={graph}
+        />
+      </div>
+      <div
+        style={{ flex: 0, display: "flex", position: "relative" }}
+        id={`node-${node.id}`}
+      >
+        <div className="node" style={{ minWidth: "10em" }}>
+          <span>{node.title}</span>
+        </div>
+      </div>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+        }}
+      >
+        <Related
+          nodeId={nodeId}
+          levels={targetLevels}
+          direction={Directions.targets}
+          graph={graph}
+        />
+      </div>
     </div>
-    <div style={{display: 'inline-block', flex: 1}}>
-      <div className='node'>{node.title}</div>
-    </div>
-    <div style={{display: 'inline-block', flex: 1}}>
-      {
-        provides.map(({id, title, dependencies}) =>
-          <NodeLink key={id} id={id} title={title} popupPosition={'left'}
-                    description={dependencies.find(R.propEq('id', node.id)).description}/>)
-      }
-    </div>
-  </div>
+  );
 }

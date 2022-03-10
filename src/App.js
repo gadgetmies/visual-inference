@@ -13,7 +13,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route index element={<Nodes/>}/>
-        <Route path="/:nodeId" element={<Node/>}/>
+        <Route path="/:nodeId" element={<Node sourceLevels={2} targetLevels={2} />}/>
       </Routes>
     </BrowserRouter>
   );
