@@ -1,10 +1,14 @@
 import { useParams } from "react-router-dom";
-import graph from "./graph.js";
 import * as R from "ramda";
 import Related, { Directions } from "./Related";
 
-export default function Node({ sourceLevels = 1, targetLevels = 1 }) {
-  const nodeId = parseInt(useParams()?.nodeId, 10);
+export default function Node({ graph, sourceLevels = 1, targetLevels = 1 }) {
+  const params = useParams()
+  if (graph.nodes.length === 0) {
+    return <div>Loading</div>
+  }
+
+  const nodeId = parseInt(params?.nodeId, 10);
   const node = graph.nodes.find(R.propEq("id", nodeId || 0));
 
   return (
