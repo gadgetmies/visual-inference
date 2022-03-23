@@ -1,11 +1,16 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import * as R from "ramda";
 import Related, { Directions } from "./Related";
+import { useEffect } from "react";
 
 export default function Node({ graph, sourceLevels = 1, targetLevels = 1 }) {
-  const params = useParams()
+  const params = useParams();
+  const navigate = useNavigate();
+
   if (graph.nodes.length === 0) {
-    return <div>Loading</div>
+    console.log("navigating");
+    navigate("/");
+    return "Loading..."
   }
 
   const nodeId = parseInt(params?.nodeId, 10);

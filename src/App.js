@@ -6,25 +6,34 @@ import Login from "./Login.js";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { useEffect, useState } from "react";
 
+const storePassword = (password) => {
+  window.localStorage.setItem("password", password);
+};
+
 function App() {
   const [graph, setGraph] = useState({ nodes: [], connections: [] });
-  const [password, setPassword] = useState("");
+  const [password, setPassword] = useState(
+    window.localStorage.getItem("password")
+  );
+  const [error, setError] = useState(null);
 
   useEffect(async () => {
-    if (password === "") {
+    let sheets;
+
+    try {
+      const res = await fetch(
+        `https://google-sheet-server.herokuapp.com/api/1qbP4LUm-EZAB_Rn-ntIcec5EyE3uWiks6bfSUfEEnvM`,
+        {
+          headers: new Headers({
+            Authorization: `Basic ${btoa(`6bet70y8Ri:${password}`)}`,
+          }),
+        }
+      );
+      sheets = (await res.json()).sheets;
+    } catch (e) {
+      setError("Fetching data failed");
       return;
     }
-
-    const res = await fetch(
-      `https://google-sheet-server.herokuapp.com/api/1qbP4LUm-EZAB_Rn-ntIcec5EyE3uWiks6bfSUfEEnvM`,
-      {
-        headers: new Headers({
-          Authorization: `Basic ${btoa(`6bet70y8Ri:${password}`)}`,
-        }),
-      }
-    );
-
-    const { sheets } = await res.json();
 
     const nodes = sheets[0].values.map(([title], id) => ({ id, title }));
     const connections = sheets[1].values.map(
@@ -45,19 +54,28 @@ function App() {
         <Route
           index
           element={
-            password === "" ? (
-              <Login setPassword={setPassword} />
-            ) : (
-              <>
-                {graph.nodes.length === 0 ? <div>Loading...</div> : null}
-                <Nodes graph={graph} />
-              </>
-            )
+            <>
+              {error !== null ? <div>{error}</div> : null}
+              {error !== null || password === null ? (
+                <Login
+                  setPassword={(password) => {
+                    setError("");
+                    storePassword(password);
+                    setPassword(password);
+                  }}
+                />
+              ) : (
+                <>
+                  {graph.nodes.length === 0 ? <div>Loading...</div> : null}
+                  <Nodes graph={graph} />
+                </>
+              )}
+            </>
           }
         />
         <Route
           path="/:nodeId"
-          element={<Node graph={graph} sourceLevels={1} targetLevels={1} />}
+          element={<Node graph={graph} sourceLevels={2} targetLevels={2} />}
         />
       </Routes>
     </BrowserRouter>
