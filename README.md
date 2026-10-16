@@ -1,70 +1,48 @@
-# Getting Started with Create React App
+# Visual inference
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Explore cause-and-effect graphs. Pick a node to see what leads to it (causes, on the left) and what it leads to (effects, on the right), two steps in each direction.
 
-## Available Scripts
+## Data sources
 
-In the project directory, you can run:
+Choose the source on the first visit, or later from the settings button in the header.
 
-### `npm start`
+- **Google Sheet**: paste the sheet URL or ID. Share the sheet as *Anyone with the link can view*; it is read directly from the browser, so no server is needed.
+  - **Nodes tab** (optional): column A is the node title.
+  - **Connections tab**: column A is the cause, B the effect, C the reasoning (optional). Nodes that only appear here are added automatically.
+  - Tick *The first row of each tab is a header* if your tabs have a header row.
+- **Sheet proxy**: for private sheets served through a [google-sheet-server](https://github.com/gadgetmies/google-sheet-server) compatible endpoint (`{ sheets: [{ values }, …] }`), with optional basic-auth credentials.
+- **This browser**: build a graph without a sheet, starting empty or from the example.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### Sharing a link to a sheet
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Add `?sheet=<sheet id>` to the app URL (optionally `&nodes=<tab>&connections=<tab>&header=1`). The settings page has a *Copy link* button that builds this for you.
 
-### `npm test`
+## Editing the graph
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Click **Edit graph**. You can then:
 
-### `npm run build`
+- add nodes from the overview,
+- rename or delete a node, and add, remove or annotate its causes and effects from the panel on the node page.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+Edits are saved in your browser. For a Google Sheet source, **Copy nodes** and **Copy connections** copy tab-separated rows that you paste into cell A1 of the matching tab. Then use **Discard changes** to go back to reading the sheet. You can also export or import the whole graph as JSON.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Publishing on GitHub Pages
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+The `Deploy to GitHub Pages` workflow (`.github/workflows/deploy.yml`) runs the tests, builds the app and publishes it on every push to `main`.
 
-### `npm run eject`
+1. In the repository settings, open **Pages** and set **Source** to **GitHub Actions**.
+2. Optionally, under **Settings → Secrets and variables → Actions → Variables**, set `SHEET_ID` (and `NODES_TAB`, `CONNECTIONS_TAB`, `SHEET_HAS_HEADER`) so that visitors open that sheet by default.
+3. Push to `main`, or run the workflow by hand from the Actions tab.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+The app uses hash-based routes (`#/node/3`) and relative asset paths, so it works under `https://<user>.github.io/<repo>/` without extra configuration.
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Development
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+```sh
+yarn install
+yarn start      # dev server on http://localhost:3000
+yarn test       # unit tests
+yarn build      # production build in build/
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+You can set `REACT_APP_SHEET_ID` (and the other `REACT_APP_*` variables used in the workflow) in a `.env.local` file to open a sheet by default.

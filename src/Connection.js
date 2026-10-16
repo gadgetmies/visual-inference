@@ -1,41 +1,11 @@
-import Info from "./Info";
-
-export default function Connection({ info }) {
+// Causality always reads left to right: cause → effect.
+export default function Connection({ isCause }) {
   return (
-    <div style={{ position: "relative" }}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 350 100"
-        style={{ position: "absolute", left: "-2em", width: "4em", top: "50%" }}
-      >
-        <defs>
-          <marker
-            id="arrowhead"
-            markerWidth="10"
-            markerHeight="7"
-            refX="0"
-            refY="3.5"
-            orient="auto"
-          >
-            <polygon points="0 0, 10 3.5, 0 7" />
-          </marker>
-        </defs>
-        <line
-          x1="0"
-          y1="50"
-          x2="250"
-          y2="50"
-          stroke="#000"
-          strokeWidth="8"
-          markerEnd="url(#arrowhead)"
-        />
+    <span className={`arrow ${isCause ? "arrow-cause" : "arrow-effect"}`} aria-hidden="true">
+      <svg viewBox="0 0 28 12" width="28" height="12">
+        <path d="M0 6h24" />
+        <path d="M19 1l6 5-6 5" />
       </svg>
-      {info ? (
-        <Info
-          style={{ position: "absolute", left: "-1em", top: "50%" }}
-          text={info}
-        />
-      ) : null}
-    </div>
+    </span>
   );
 }

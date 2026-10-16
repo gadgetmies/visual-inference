@@ -1,4 +1,4 @@
-export default {
+const exampleGraph = {
   nodes: [
     {
       id: 1,
@@ -102,3 +102,5 @@ export default {
     }
   ],
 };
+
+export default exampleGraph;

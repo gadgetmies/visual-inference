@@ -1,84 +1,172 @@
 import "./App.css";
+import Header from "./Header.js";
+import Overview from "./Nodes.js";
 import Node from "./Node.js";
-import Nodes from "./Nodes.js";
-import Login from "./Login.js";
+import Setup from "./Setup.js";
+import EditBar from "./EditBar.js";
 
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { HashRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import {
+  fetchGraphFromProxy,
+  fetchGraphFromSheet,
+  SourceKinds,
+} from "./sheets.js";
+import { emptyGraph } from "./graphOps.js";
+import {
+  initialSource,
+  loadDraft,
+  saveDraft,
+  saveSource,
+  sourceKey,
+} from "./storage.js";
 
-const storePassword = (password) => {
-  window.localStorage.setItem("password", password);
-};
+function LegacyNodeRedirect() {
+  const { nodeId } = useParams();
+  return <Navigate replace to={`/node/${nodeId}`} />;
+}
 
 function App() {
-  const [graph, setGraph] = useState({ nodes: [], connections: [] });
-  const [password, setPassword] = useState(
-    window.localStorage.getItem("password")
-  );
+  const [source, setSource] = useState(initialSource);
+  const key = sourceKey(source);
+  const [remoteGraph, setRemoteGraph] = useState(null);
+  const [draft, setDraft] = useState(() => loadDraft(key));
   const [error, setError] = useState(null);
+  const [reloadCount, setReloadCount] = useState(0);
+  const [editing, setEditing] = useState(false);
 
-  useEffect(async () => {
-    let sheets;
+  useEffect(() => {
+    let cancelled = false;
+    setRemoteGraph(null);
+    setError(null);
+    if (!source) return;
 
-    try {
-      const res = await fetch(
-        `https://google-sheet-server.herokuapp.com/api/1qbP4LUm-EZAB_Rn-ntIcec5EyE3uWiks6bfSUfEEnvM`,
-        {
-          headers: new Headers({
-            Authorization: `Basic ${btoa(`6bet70y8Ri:${password}`)}`,
-          }),
-        }
-      );
-      sheets = (await res.json()).sheets;
-    } catch (e) {
-      setError("Fetching data failed");
+    if (source.kind === SourceKinds.local) {
+      setRemoteGraph(emptyGraph);
       return;
     }
 
-    const nodes = sheets[0].values.map(([title], id) => ({ id, title }));
-    const connections = sheets[1].values.map(
-      ([source, target, description]) => ({
-        source: nodes.findIndex(({ title }) => title === source),
-        target: nodes.findIndex(({ title }) => title === target),
-        description,
-      })
+    const load =
+      source.kind === SourceKinds.proxy
+        ? fetchGraphFromProxy(source)
+        : fetchGraphFromSheet(source);
+    load.then(
+      (graph) => !cancelled && setRemoteGraph(graph),
+      (e) => !cancelled && setError(e.message || "Loading the graph failed.")
     );
+    return () => {
+      cancelled = true;
+    };
+  }, [source, reloadCount]);
 
-    console.log(nodes, connections);
-    return setGraph({ nodes, connections });
-  }, [password]);
+  const graph = draft || remoteGraph;
+  const isLocal = source?.kind === SourceKinds.local;
+
+  // Runs the update synchronously so callers can read results (e.g. a new
+  // node's id) right away.
+  const updateGraph = useCallback(
+    (update) => {
+      const next = update(graph || emptyGraph);
+      saveDraft(key, next);
+      setDraft(next);
+    },
+    [key, graph]
+  );
+
+  const discardDraft = () => {
+    saveDraft(key, null);
+    setDraft(null);
+  };
+
+  const chooseSource = (nextSource, initialGraph = null) => {
+    const nextKey = sourceKey(nextSource);
+    saveSource(nextSource);
+    if (initialGraph) saveDraft(nextKey, initialGraph);
+    setDraft(loadDraft(nextKey));
+    setSource(nextSource);
+    setReloadCount((n) => n + 1);
+    if (initialGraph || nextSource.kind === SourceKinds.local) setEditing(true);
+  };
+
+  if (!source || (error && !draft)) {
+    return (
+      <HashRouter>
+        <Setup source={source} error={error} onSubmit={chooseSource} />
+      </HashRouter>
+    );
+  }
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route
-          index
-          element={
-            <>
-              {error !== null ? <div>{error}</div> : null}
-              {error !== null || password === null ? (
-                <Login
-                  setPassword={(password) => {
-                    setError("");
-                    storePassword(password);
-                    setPassword(password);
-                  }}
+    <HashRouter>
+      <div className="app">
+        <Header
+          source={source}
+          graph={graph}
+          editing={editing}
+          setEditing={setEditing}
+        />
+        {editing || (draft && !isLocal) ? (
+          <EditBar
+            graph={graph}
+            source={source}
+            hasDraft={Boolean(draft)}
+            editing={editing}
+            onDone={() => setEditing(false)}
+            onDiscard={discardDraft}
+            onImport={(imported) => updateGraph(() => imported)}
+          />
+        ) : null}
+        {error && draft ? (
+          <div className="notice notice-error" role="alert">
+            {error} Showing your locally saved copy.
+          </div>
+        ) : null}
+        {graph === null ? (
+          <div className="loading" role="status">
+            <span className="spinner" aria-hidden="true" />
+            Loading graph…
+          </div>
+        ) : (
+          <Routes>
+            <Route
+              index
+              element={
+                <Overview
+                  graph={graph}
+                  editing={editing}
+                  updateGraph={updateGraph}
+                  setEditing={setEditing}
                 />
-              ) : (
-                <>
-                  {graph.nodes.length === 0 ? <div>Loading...</div> : null}
-                  <Nodes graph={graph} />
-                </>
-              )}
-            </>
-          }
-        />
-        <Route
-          path="/:nodeId"
-          element={<Node graph={graph} sourceLevels={2} targetLevels={2} />}
-        />
-      </Routes>
-    </BrowserRouter>
+              }
+            />
+            <Route
+              path="/node/:nodeId"
+              element={
+                <Node
+                  graph={graph}
+                  editing={editing}
+                  updateGraph={updateGraph}
+                  sourceLevels={2}
+                  targetLevels={2}
+                />
+              }
+            />
+            <Route
+              path="/settings"
+              element={
+                <Setup
+                  source={source}
+                  onSubmit={chooseSource}
+                  onReload={() => setReloadCount((n) => n + 1)}
+                  embedded
+                />
+              }
+            />
+            <Route path="/:nodeId" element={<LegacyNodeRedirect />} />
+          </Routes>
+        )}
+      </div>
+    </HashRouter>
   );
 }
 
