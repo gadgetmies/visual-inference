@@ -2,6 +2,10 @@
 
 Explore cause-and-effect graphs. Pick a node to see what leads to it (causes, on the left) and what it leads to (effects, on the right), two steps in each direction.
 
+## Trying it out
+
+Click **Explore the example graph** on the first screen, or open the app with `?example` in the URL (for example `https://gadgetmies.github.io/visual-inference/?example`). The example shows how protected bike lanes ripple through a city. Changes you make to it stay in your browser and never overwrite a graph you have saved there.
+
 ## Data sources
 
 Choose the source on the first visit, or later from the settings button in the header.
@@ -11,7 +15,7 @@ Choose the source on the first visit, or later from the settings button in the h
   - **Connections tab**: column A is the cause, B the effect, C the reasoning (optional). Nodes that only appear here are added automatically.
   - Tick *The first row of each tab is a header* if your tabs have a header row.
 - **Sheet proxy**: for private sheets served through a [google-sheet-server](https://github.com/gadgetmies/google-sheet-server) compatible endpoint (`{ sheets: [{ values }, …] }`), with optional basic-auth credentials.
-- **This browser**: build a graph without a sheet, starting empty or from the example.
+- **This browser**: build a graph from scratch without a sheet.
 
 ### Sharing a link to a sheet
 

@@ -10,6 +10,8 @@ const sourceLabel = (source) => {
       return "Google Sheet";
     case SourceKinds.proxy:
       return "Sheet proxy";
+    case SourceKinds.example:
+      return "Example";
     default:
       return "Local graph";
   }

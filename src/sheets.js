@@ -8,6 +8,7 @@ export const SourceKinds = {
   sheet: "sheet",
   proxy: "proxy",
   local: "local",
+  example: "example",
 };
 
 export const defaultSheetSource = {

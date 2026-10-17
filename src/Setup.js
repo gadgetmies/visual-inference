@@ -13,7 +13,9 @@ const kinds = [
 
 export default function Setup({ source, error, onSubmit, onReload, embedded = false }) {
   const navigate = useNavigate();
-  const [kind, setKind] = useState(source?.kind || SourceKinds.sheet);
+  const [kind, setKind] = useState(
+    kinds.some(({ kind }) => kind === source?.kind) ? source.kind : SourceKinds.sheet
+  );
   const [sheetInput, setSheetInput] = useState(
     source?.kind === SourceKinds.sheet ? sheetUrl(source.sheetId) : ""
   );
@@ -60,17 +62,14 @@ export default function Setup({ source, error, onSubmit, onReload, embedded = fa
     done();
   };
 
-  const startLocal = (withExample) => {
-    const existing = loadDraft("local");
-    if (
-      withExample &&
-      existing?.nodes.length > 0 &&
-      !window.confirm("Replace the graph saved in this browser with the example?")
-    ) {
-      return;
-    }
-    onSubmit({ kind: SourceKinds.local }, withExample ? exampleGraph : null);
+  const startLocal = () => {
+    onSubmit({ kind: SourceKinds.local });
     done();
+  };
+
+  const viewExample = () => {
+    onSubmit({ kind: SourceKinds.example });
+    navigate("/");
   };
 
   const copyLink = async () => {
@@ -101,6 +100,25 @@ export default function Setup({ source, error, onSubmit, onReload, embedded = fa
             Explore how things lead to one another. The graph is read from a Google
             Sheet: one tab lists the nodes, another lists the connections between them.
           </p>
+        </div>
+
+        {source?.kind === SourceKinds.example ? null : (
+          <button type="button" className="example-cta" onClick={viewExample}>
+            <span className="example-cta-text">
+              <span className="example-cta-title">Explore the example graph</span>
+              <span className="muted">
+                How protected bike lanes ripple through a city ·{" "}
+                {exampleGraph.nodes.length} nodes
+              </span>
+            </span>
+            <span className="example-cta-arrow" aria-hidden="true">
+              →
+            </span>
+          </button>
+        )}
+
+        <div className="divider">
+          <span>{source?.kind === SourceKinds.example ? "Use your own data" : "or use your own data"}</span>
         </div>
 
         <div className="segmented" role="tablist" aria-label="Source type">
@@ -210,8 +228,8 @@ export default function Setup({ source, error, onSubmit, onReload, embedded = fa
 
         {kind === SourceKinds.local ? (
           <div className="hint">
-            Build a graph without a sheet. It is saved in this browser; export it as
-            JSON or copy it into a sheet when you are ready to share.
+            Build a graph from scratch without a sheet. It is saved in this browser;
+            export it as JSON or copy it into a sheet when you are ready to share.
             {localGraph?.nodes.length ? (
               <>
                 <br />A graph with {localGraph.nodes.length} nodes is already saved here.
@@ -223,14 +241,8 @@ export default function Setup({ source, error, onSubmit, onReload, embedded = fa
         <div className="actions">
           {kind === SourceKinds.local ? (
             <>
-              <button type="button" className="button" onClick={() => startLocal(true)}>
-                Load the example
-              </button>
-              <button
-                type="button"
-                className="button button-primary"
-                onClick={() => startLocal(false)}
-              >
+              <span />
+              <button type="button" className="button button-primary" onClick={startLocal}>
                 {localGraph?.nodes.length ? "Open saved graph" : "Start an empty graph"}
               </button>
             </>
@@ -257,10 +269,10 @@ export default function Setup({ source, error, onSubmit, onReload, embedded = fa
           )}
         </div>
 
-        {embedded && source?.kind === SourceKinds.sheet ? (
+        {embedded && [SourceKinds.sheet, SourceKinds.example].includes(source?.kind) ? (
           <div className="share-row">
             <span className="muted">
-              Share a link that opens this sheet directly.
+              Share a link that opens this {source.kind === SourceKinds.example ? "example" : "sheet"} directly.
             </span>
             <button type="button" className="button button-small" onClick={copyLink}>
               {copied ? "Link copied" : "Copy link"}

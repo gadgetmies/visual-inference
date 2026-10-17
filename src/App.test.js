@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import App from "./App";
 
 beforeEach(() => window.localStorage.clear());
@@ -27,4 +27,20 @@ test("opens a graph saved in this browser", () => {
   render(<App />);
   expect(screen.getByText("Rain")).toBeInTheDocument();
   expect(screen.getByText("Wet streets")).toBeInTheDocument();
+});
+
+test("opens the example from the setup screen", () => {
+  render(<App />);
+  fireEvent.click(screen.getByRole("button", { name: /explore the example graph/i }));
+  expect(screen.getByText(/you’re viewing an example/i)).toBeInTheDocument();
+  expect(screen.getByText("Protected bike lanes")).toBeInTheDocument();
+  // The example doesn't overwrite a graph saved in this browser.
+  expect(window.localStorage.getItem("visual-inference:draft:local")).toBeNull();
+});
+
+test("opens the example from ?example", () => {
+  window.history.replaceState(null, "", "/?example");
+  render(<App />);
+  expect(screen.getByText("People cycling")).toBeInTheDocument();
+  window.history.replaceState(null, "", "/");
 });

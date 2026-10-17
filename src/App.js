@@ -5,7 +5,7 @@ import Node from "./Node.js";
 import Setup from "./Setup.js";
 import EditBar from "./EditBar.js";
 
-import { HashRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
+import { HashRouter, Link, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 import {
   fetchGraphFromProxy,
@@ -13,6 +13,7 @@ import {
   SourceKinds,
 } from "./sheets.js";
 import { emptyGraph } from "./graphOps.js";
+import exampleGraph from "./exampleGraph.js";
 import {
   initialSource,
   loadDraft,
@@ -45,6 +46,10 @@ function App() {
       setRemoteGraph(emptyGraph);
       return;
     }
+    if (source.kind === SourceKinds.example) {
+      setRemoteGraph(exampleGraph);
+      return;
+    }
 
     const load =
       source.kind === SourceKinds.proxy
@@ -61,6 +66,7 @@ function App() {
 
   const graph = draft || remoteGraph;
   const isLocal = source?.kind === SourceKinds.local;
+  const isExample = source?.kind === SourceKinds.example;
 
   // Runs the update synchronously so callers can read results (e.g. a new
   // node's id) right away.
@@ -85,7 +91,7 @@ function App() {
     setDraft(loadDraft(nextKey));
     setSource(nextSource);
     setReloadCount((n) => n + 1);
-    if (initialGraph || nextSource.kind === SourceKinds.local) setEditing(true);
+    setEditing(Boolean(initialGraph) || nextSource.kind === SourceKinds.local);
   };
 
   if (!source || (error && !draft)) {
@@ -115,6 +121,17 @@ function App() {
             onDiscard={discardDraft}
             onImport={(imported) => updateGraph(() => imported)}
           />
+        ) : null}
+        {isExample ? (
+          <div className="example-banner">
+            <span>
+              You’re viewing an example about city cycling. Pick a node to see what
+              causes it and what it leads to.
+            </span>
+            <Link to="/settings" className="button button-small button-primary">
+              Use your own sheet
+            </Link>
+          </div>
         ) : null}
         {error && draft ? (
           <div className="notice notice-error" role="alert">

@@ -50,8 +50,13 @@ export default function EditBar({
     }
   };
 
+  const isExample = source.kind === SourceKinds.example;
   const status = isLocal
     ? "Changes are saved in this browser."
+    : isExample
+    ? hasDraft
+      ? "You have changed the example. Discard the changes to restore it."
+      : "Try editing the example. Your changes stay in this browser."
     : hasDraft
     ? "You have local changes that are not in the sheet yet."
     : "Changes are saved in this browser until you copy them to the sheet.";
@@ -115,7 +120,13 @@ export default function EditBar({
           type="button"
           className="button button-small button-danger"
           onClick={() => {
-            if (window.confirm("Discard your local changes and show the sheet as it is?"))
+            if (
+              window.confirm(
+                isExample
+                  ? "Discard your changes and restore the example?"
+                  : "Discard your local changes and show the sheet as it is?"
+              )
+            )
               onDiscard();
           }}
         >

@@ -25,6 +25,7 @@ const write = (key, value) => {
 // Next comes the source the visitor chose earlier, then the build-time default.
 export function initialSource() {
   const params = new URLSearchParams(window.location.search);
+  if (params.has("example")) return { kind: SourceKinds.example };
   const fromUrl = parseSheetId(params.get("sheet") || "");
   if (fromUrl) {
     return {
@@ -69,6 +70,8 @@ export function sourceKey(source) {
       return `sheet:${source.sheetId}`;
     case SourceKinds.proxy:
       return `proxy:${source.url}`;
+    case SourceKinds.example:
+      return "example";
     default:
       return "local";
   }
@@ -81,7 +84,9 @@ export function shareableUrl(source) {
   const url = new URL(window.location.href);
   url.search = "";
   url.hash = "";
-  if (source?.kind === SourceKinds.sheet) {
+  if (source?.kind === SourceKinds.example) {
+    url.searchParams.set("example", "");
+  } else if (source?.kind === SourceKinds.sheet) {
     url.searchParams.set("sheet", source.sheetId);
     if (source.nodesTab !== defaultSheetSource.nodesTab)
       url.searchParams.set("nodes", source.nodesTab);
