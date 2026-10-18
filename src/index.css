@@ -18,6 +18,8 @@
   --focus-muted: #c9cdd6;
   --loop: #0f766e;
   --loop-soft: #e6f6f4;
+  --balancing: #6d28d9;
+  --balancing-soft: #f3effe;
   --danger: #b91c1c;
   --danger-line: #fca5a5;
   --warn-bg: #fff7ed;
@@ -53,6 +55,8 @@
     --focus-muted: #4b5160;
     --loop: #4fd1c5;
     --loop-soft: #12302d;
+    --balancing: #b69cff;
+    --balancing-soft: #261d3d;
     --danger: #f87171;
     --danger-line: #7f1d1d;
     --warn-bg: #2d2113;

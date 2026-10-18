@@ -1,4 +1,5 @@
 // Example: how protected bike lanes ripple through a city.
+// polarity "+": more of the cause means more of the effect; "-": less.
 const exampleGraph = {
   nodes: [
     { id: 0, title: "Protected bike lanes" },
@@ -18,140 +19,185 @@ const exampleGraph = {
     { id: 14, title: "Bus travel times" },
     { id: 15, title: "Physical activity" },
     { id: 16, title: "Household transport costs" },
+    { id: 17, title: "Crowding on bike lanes" },
   ],
   connections: [
     {
       source: 0,
       target: 1,
+      polarity: "+",
       description:
         "Physical separation from cars makes riding feel safe for beginners, children and older people.",
     },
     {
       source: 0,
       target: 4,
+      polarity: "+",
       description:
         "Taking a lane from cars can add congestion at first, until traffic adapts.",
     },
     {
       source: 1,
       target: 2,
+      polarity: "+",
       description: "Fear of traffic is the most common reason people give for not cycling.",
     },
     {
       source: 2,
       target: 1,
+      polarity: "+",
       description:
         "Safety in numbers: drivers watch out for cyclists when there are more of them.",
     },
     {
       source: 2,
       target: 3,
+      polarity: "-",
       description: "Many short car trips are replaced by bike trips.",
     },
     {
       source: 2,
       target: 15,
+      polarity: "+",
       description: "Cycling builds everyday exercise into the commute.",
     },
     {
       source: 2,
       target: 9,
+      polarity: "+",
       description: "People on bikes stop more easily, so they shop locally more often.",
     },
     {
       source: 2,
       target: 11,
+      polarity: "+",
       description: "More people cycling means more voters who care about it.",
     },
     {
       source: 2,
       target: 16,
+      polarity: "-",
       description: "A bike costs far less to own and run than a car.",
     },
     {
       source: 3,
       target: 4,
+      polarity: "+",
       description: "More cars on the same roads means longer queues.",
     },
     {
       source: 3,
       target: 5,
+      polarity: "+",
       description: "Exhaust and tyre wear are major sources of urban NO₂ and particulates.",
     },
     {
       source: 3,
       target: 8,
+      polarity: "+",
       description: "Engines and tyres are the main source of street noise.",
     },
     {
       source: 3,
       target: 13,
+      polarity: "+",
       description: "More car traffic means more collisions.",
     },
     {
       source: 4,
       target: 14,
+      polarity: "+",
       description: "Buses get stuck in the same queues as cars.",
     },
     {
       source: 14,
       target: 3,
+      polarity: "+",
       description: "Slow, unreliable buses push people back into cars.",
     },
     {
       source: 13,
       target: 1,
+      polarity: "-",
       description: "News of crashes shapes how dangerous people think cycling is.",
     },
     {
       source: 5,
       target: 6,
+      polarity: "-",
       description: "Air pollution raises rates of asthma, heart and lung disease.",
     },
     {
       source: 8,
       target: 6,
+      polarity: "-",
       description: "Constant noise disturbs sleep and raises stress.",
     },
     {
       source: 15,
       target: 6,
+      polarity: "+",
       description: "Regular moderate exercise lowers the risk of many chronic diseases.",
     },
     {
       source: 13,
       target: 6,
+      polarity: "-",
       description: "Injuries cause lasting harm as well as immediate suffering.",
     },
     {
       source: 6,
       target: 7,
+      polarity: "-",
       description: "Healthier residents need less treatment.",
     },
     {
       source: 7,
       target: 12,
+      polarity: "-",
       description: "Health savings strengthen the business case for cycling investment.",
     },
     {
       source: 9,
       target: 10,
+      polarity: "+",
       description: "More visits mean more sales.",
     },
     {
       source: 10,
       target: 11,
+      polarity: "+",
       description: "Shop owners who see the benefit back further schemes.",
     },
     {
       source: 11,
       target: 12,
+      polarity: "+",
       description: "Politicians fund what voters and local businesses support.",
     },
     {
       source: 12,
       target: 0,
+      polarity: "+",
       description: "Investment pays for building and maintaining protected lanes.",
+    },
+    {
+      source: 2,
+      target: 17,
+      polarity: "+",
+      description: "More riders on the same lanes means busier lanes.",
+    },
+    {
+      source: 17,
+      target: 1,
+      polarity: "-",
+      description: "Crowded lanes with mixed speeds feel less safe, putting off newcomers.",
+    },
+    {
+      source: 0,
+      target: 17,
+      polarity: "-",
+      description: "More lane space spreads riders out.",
     },
   ],
 };

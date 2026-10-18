@@ -1,4 +1,4 @@
-import { findLoops, hasPath, loopsThrough, rotateLoop } from "./loopAnalysis";
+import { classifyLoop, findLoops, hasPath, LoopTypes, loopsThrough, rotateLoop } from "./loopAnalysis";
 import exampleGraph from "./exampleGraph";
 
 const graph = (edges) => ({
@@ -58,4 +58,19 @@ test("rotates loops and finds paths", () => {
 
 test("the example has loops", () => {
   expect(findLoops(exampleGraph).loops.length).toBeGreaterThan(3);
+});
+
+test("classifies loops by the number of opposite links", () => {
+  const loop = (...polarities) => ({ connections: polarities.map((polarity) => ({ polarity })) });
+  expect(classifyLoop(loop("+", "+"))).toBe(LoopTypes.reinforcing);
+  expect(classifyLoop(loop("-", "+", "-"))).toBe(LoopTypes.reinforcing);
+  expect(classifyLoop(loop("+", "-"))).toBe(LoopTypes.balancing);
+  expect(classifyLoop(loop("+", ""))).toBe(LoopTypes.unknown);
+});
+
+test("the example has both reinforcing and balancing loops", () => {
+  const types = findLoops(exampleGraph).loops.map(classifyLoop);
+  expect(types).toContain(LoopTypes.reinforcing);
+  expect(types).toContain(LoopTypes.balancing);
+  expect(types).not.toContain(LoopTypes.unknown);
 });

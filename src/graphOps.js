@@ -35,19 +35,23 @@ export function deleteNode(graph, id) {
 export const hasConnection = (graph, source, target) =>
   graph.connections.some((c) => c.source === source && c.target === target);
 
-export function addConnection(graph, source, target, description = "") {
+export function addConnection(graph, source, target, fields = {}) {
   if (source === target || hasConnection(graph, source, target)) return graph;
   return {
     ...graph,
-    connections: [...graph.connections, { source, target, description }],
+    connections: [
+      ...graph.connections,
+      { description: "", polarity: "", ...fields, source, target },
+    ],
   };
 }
 
-export function updateConnection(graph, source, target, description) {
+// `changes` is an object of fields to set, e.g. { description } or { polarity }.
+export function updateConnection(graph, source, target, changes) {
   return {
     ...graph,
     connections: graph.connections.map((c) =>
-      c.source === source && c.target === target ? { ...c, description } : c
+      c.source === source && c.target === target ? { ...c, ...changes } : c
     ),
   };
 }

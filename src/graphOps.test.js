@@ -19,8 +19,10 @@ test("edits a graph immutably", () => {
   expect(addConnection(g, a.id, b.id)).toBe(g);
   expect(addConnection(g, a.id, a.id)).toBe(g);
 
-  g = updateConnection(g, a.id, b.id, "because");
-  expect(g.connections).toEqual([{ source: 0, target: 1, description: "because" }]);
+  g = updateConnection(g, a.id, b.id, { description: "because", polarity: "-" });
+  expect(g.connections).toEqual([
+    { source: 0, target: 1, description: "because", polarity: "-" },
+  ]);
 
   g = renameNode(g, b.id, "Bee");
   expect(g.nodes[1].title).toBe("Bee");

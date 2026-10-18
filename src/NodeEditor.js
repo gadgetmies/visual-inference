@@ -13,6 +13,32 @@ import {
   updateConnection,
 } from "./graphOps";
 
+const polarityOptions = [
+  { value: "+", label: "+ Same", title: "More of the cause means more of the effect" },
+  { value: "-", label: "− Opposite", title: "More of the cause means less of the effect" },
+  { value: "", label: "Unknown", title: "Direction of the effect not specified" },
+];
+
+function PolarityPicker({ value, onChange }) {
+  return (
+    <div className="polarity-picker" role="radiogroup" aria-label="Direction of the effect">
+      {polarityOptions.map((option) => (
+        <button
+          key={option.value || "unknown"}
+          type="button"
+          role="radio"
+          aria-checked={value === option.value}
+          title={option.title}
+          className={value === option.value ? "active" : ""}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
 function ConnectionEditor({ graph, connection, otherId, updateGraph }) {
   const other = findNode(graph, otherId);
   const { source, target } = connection;
@@ -29,12 +55,20 @@ function ConnectionEditor({ graph, connection, otherId, updateGraph }) {
           Remove
         </button>
       </div>
+      <PolarityPicker
+        value={connection.polarity || ""}
+        onChange={(polarity) =>
+          updateGraph((g) => updateConnection(g, source, target, { polarity }))
+        }
+      />
       <textarea
         aria-label={`Reasoning for ${other?.title}`}
         placeholder="Why does this lead to that? (optional)"
         value={connection.description || ""}
         onChange={(e) =>
-          updateGraph((g) => updateConnection(g, source, target, e.target.value))
+          updateGraph((g) =>
+            updateConnection(g, source, target, { description: e.target.value })
+          )
         }
       />
     </li>

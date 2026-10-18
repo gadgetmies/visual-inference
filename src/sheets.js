@@ -92,9 +92,18 @@ async function fetchTab(sheetId, tab) {
 
 const isBlank = (row) => row.every((cell) => (cell || "").trim() === "");
 
+// Column D of a connection: does the effect move the same way as the cause (+)
+// or the opposite way (−)? Anything else means unknown.
+export function parsePolarity(value = "") {
+  const v = value.trim().toLowerCase();
+  if (["+", "plus", "positive", "same", "s", "more"].includes(v)) return "+";
+  if (["-", "−", "–", "minus", "negative", "opposite", "o", "less"].includes(v)) return "-";
+  return "";
+}
+
 // Builds the graph from raw rows: node rows have the title in the first
-// column, connection rows are [cause, effect, reasoning]. Nodes that are only
-// mentioned in connections are added automatically.
+// column, connection rows are [cause, effect, reasoning, polarity]. Nodes that
+// are only mentioned in connections are added automatically.
 export function graphFromRows(nodeRows, connectionRows) {
   const nodes = [];
   const idByTitle = new Map();
@@ -113,10 +122,11 @@ export function graphFromRows(nodeRows, connectionRows) {
 
   const connections = connectionRows
     .filter((row) => !isBlank(row))
-    .map(([source, target, description = ""]) => ({
+    .map(([source, target, description = "", polarity = ""]) => ({
       source: ensureNode(source),
       target: ensureNode(target),
       description: description.trim(),
+      polarity: parsePolarity(polarity),
     }))
     .filter(({ source, target }) => source !== null && target !== null);
 
@@ -182,10 +192,11 @@ export function graphToTsv({ nodes, connections }) {
   return {
     nodes: toTsv(nodes.map(({ title }) => [title])),
     connections: toTsv(
-      connections.map(({ source, target, description }) => [
+      connections.map(({ source, target, description, polarity }) => [
         title(source),
         title(target),
         description || "",
+        polarity || "",
       ])
     ),
   };

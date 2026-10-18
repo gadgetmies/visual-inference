@@ -83,3 +83,19 @@ export function hasPath(graph, from, to, accept = () => true) {
 }
 
 export const loopKey = (loop) => loop.connections.map((c) => `${c.source}>${c.target}`).join(",");
+
+export const LoopTypes = {
+  reinforcing: "reinforcing",
+  balancing: "balancing",
+  unknown: "unknown",
+};
+
+// A loop with an even number of opposite (−) links amplifies itself
+// (reinforcing); an odd number pushes back towards a limit (balancing).
+export function classifyLoop(loop) {
+  if (loop.connections.some((c) => c.polarity !== "+" && c.polarity !== "-")) {
+    return LoopTypes.unknown;
+  }
+  const negatives = loop.connections.filter((c) => c.polarity === "-").length;
+  return negatives % 2 === 0 ? LoopTypes.reinforcing : LoopTypes.balancing;
+}
