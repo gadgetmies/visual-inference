@@ -10,6 +10,8 @@ export const Directions = {
 export default function Related({
   graph,
   nodeId,
+  focusId,
+  highlight = null,
   levels = 1,
   depth = 0,
   direction = Directions.sources,
@@ -19,7 +21,7 @@ export default function Related({
     .filter(({ target, source }) => (isSources ? target : source) === nodeId)
     .map((connection) => ({
       node: findNode(graph, isSources ? connection.source : connection.target),
-      description: connection.description,
+      connection,
     }))
     .filter(({ node }) => node);
 
@@ -27,26 +29,42 @@ export default function Related({
 
   return (
     <div className={`related related-depth-${depth}`}>
-      {relatedNodes.map(({ description, node: { id, title } }) => (
-        <div
-          key={id}
-          className={`related-row ${isSources ? "related-sources" : "related-targets"}`}
-        >
-          <Connection isCause={isSources} />
-          <NodeLink id={id} title={title} description={description} compact={depth > 0} />
-          {levels > 1 ? (
-            <div className="related-nested">
-              <Related
-                graph={graph}
-                direction={direction}
-                levels={levels - 1}
-                depth={depth + 1}
-                nodeId={id}
-              />
-            </div>
-          ) : null}
-        </div>
-      ))}
+      {relatedNodes.map(({ connection, node: { id, title } }) => {
+        const highlighted = highlight?.has(`${connection.source}>${connection.target}`);
+        // Following the chain arrived back at the focused node: a loop.
+        const returnsHere = id === focusId;
+        return (
+          <div
+            key={id}
+            className={`related-row ${isSources ? "related-sources" : "related-targets"}`}
+          >
+            <Connection isCause={isSources} connection={connection} highlighted={highlighted} />
+            <NodeLink
+              id={id}
+              title={title}
+              description={connection.description}
+              compact={depth > 0}
+              highlighted={highlighted}
+              returnsHere={returnsHere}
+            />
+            {levels > 1 ? (
+              <div className="related-nested">
+                {returnsHere ? null : (
+                  <Related
+                    graph={graph}
+                    direction={direction}
+                    levels={levels - 1}
+                    depth={depth + 1}
+                    nodeId={id}
+                    focusId={focusId}
+                    highlight={highlight}
+                  />
+                )}
+              </div>
+            ) : null}
+          </div>
+        );
+      })}
     </div>
   );
 }

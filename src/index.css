@@ -16,6 +16,8 @@
   --focus-bg: #16181d;
   --focus-ink: #ffffff;
   --focus-muted: #c9cdd6;
+  --loop: #0f766e;
+  --loop-soft: #e6f6f4;
   --danger: #b91c1c;
   --danger-line: #fca5a5;
   --warn-bg: #fff7ed;
@@ -49,6 +51,8 @@
     --focus-bg: #eceef2;
     --focus-ink: #111317;
     --focus-muted: #4b5160;
+    --loop: #4fd1c5;
+    --loop-soft: #12302d;
     --danger: #f87171;
     --danger-line: #7f1d1d;
     --warn-bg: #2d2113;

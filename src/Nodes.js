@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { addNode, causesOf, effectsOf, findNodeByTitle } from "./graphOps";
+import OverviewTabs from "./OverviewTabs";
+import { loopsThrough } from "./loopAnalysis";
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
-export default function Overview({ graph, editing, updateGraph, setEditing }) {
+export default function Overview({ graph, loops, editing, updateGraph, setEditing }) {
   const navigate = useNavigate();
   const [filter, setFilter] = useState("");
   const [newTitle, setNewTitle] = useState("");
@@ -43,6 +45,7 @@ export default function Overview({ graph, editing, updateGraph, setEditing }) {
             causes it and what it leads to.
           </p>
         </div>
+        <OverviewTabs graph={graph} loopCount={loops.loops.length} />
         <label className="field overview-filter">
           <span className="visually-hidden">Filter nodes</span>
           <input
@@ -84,6 +87,7 @@ export default function Overview({ graph, editing, updateGraph, setEditing }) {
           {nodes.map(({ id, title }) => {
             const causes = causesOf(graph, id).length;
             const effects = effectsOf(graph, id).length;
+            const loopCount = loopsThrough(loops.loops, id).length;
             return (
               <li key={id}>
                 <Link to={`/node/${id}`} className="node-card">
@@ -91,6 +95,9 @@ export default function Overview({ graph, editing, updateGraph, setEditing }) {
                   <span className="node-card-meta">
                     <span className="tag tag-cause">{plural(causes, "cause")}</span>
                     <span className="tag tag-effect">{plural(effects, "effect")}</span>
+                    {loopCount ? (
+                      <span className="tag tag-loop">↺ {plural(loopCount, "loop")}</span>
+                    ) : null}
                   </span>
                 </Link>
               </li>

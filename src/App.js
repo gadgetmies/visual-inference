@@ -4,9 +4,11 @@ import Overview from "./Nodes.js";
 import Node from "./Node.js";
 import Setup from "./Setup.js";
 import EditBar from "./EditBar.js";
+import Loops from "./Loops.js";
+import { findLoops } from "./loopAnalysis.js";
 
 import { HashRouter, Link, Navigate, Route, Routes, useParams } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchGraphFromProxy,
   fetchGraphFromSheet,
@@ -65,6 +67,7 @@ function App() {
   }, [source, reloadCount]);
 
   const graph = draft || remoteGraph;
+  const loops = useMemo(() => (graph ? findLoops(graph) : { loops: [], truncated: false }), [graph]);
   const isLocal = source?.kind === SourceKinds.local;
   const isExample = source?.kind === SourceKinds.example;
 
@@ -150,6 +153,7 @@ function App() {
               element={
                 <Overview
                   graph={graph}
+                  loops={loops}
                   editing={editing}
                   updateGraph={updateGraph}
                   setEditing={setEditing}
@@ -161,6 +165,7 @@ function App() {
               element={
                 <Node
                   graph={graph}
+                  loops={loops}
                   editing={editing}
                   updateGraph={updateGraph}
                   sourceLevels={2}
@@ -168,6 +173,7 @@ function App() {
                 />
               }
             />
+            <Route path="/loops" element={<Loops graph={graph} loops={loops} />} />
             <Route
               path="/settings"
               element={
