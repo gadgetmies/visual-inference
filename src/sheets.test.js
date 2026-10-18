@@ -1,4 +1,11 @@
-import { graphFromRows, graphToTsv, parseCsv, parsePolarity, parseSheetId } from "./sheets";
+import {
+  graphFromRows,
+  graphToTsv,
+  parseCsv,
+  parseKind,
+  parsePolarity,
+  parseSheetId,
+} from "./sheets";
 
 test("parses sheet ids from URLs and raw ids", () => {
   const id = "1qbP4LUm-EZAB_Rn-ntIcec5EyE3uWiks6bfSUfEEnvM";
@@ -19,14 +26,14 @@ test("builds a graph and adds nodes only named in connections", () => {
     [["Rain"], [""]],
     [
       ["Rain", "Wet streets", "Water falls", "+"],
-      ["Wet streets", "Slipping"],
+      ["Wet streets", "Slipping", "", "", "Argument"],
       ["", ""],
     ]
   );
   expect(graph.nodes.map((n) => n.title)).toEqual(["Rain", "Wet streets", "Slipping"]);
   expect(graph.connections).toEqual([
-    { source: 0, target: 1, description: "Water falls", polarity: "+" },
-    { source: 1, target: 2, description: "", polarity: "" },
+    { source: 0, target: 1, description: "Water falls", polarity: "+", kind: "cause" },
+    { source: 1, target: 2, description: "", polarity: "", kind: "argument" },
   ]);
 });
 
@@ -39,11 +46,16 @@ test("exports TSV that pastes into Sheets", () => {
     connections: [{ source: 0, target: 1, description: 'says "hi"\tthere', polarity: "-" }],
   });
   expect(tsv.nodes).toBe("A\nB");
-  expect(tsv.connections).toBe('A\tB\t"says ""hi""\tthere"\t-');
+  expect(tsv.connections).toBe('A\tB\t"says ""hi""\tthere"\t-\tcause');
 });
 
 test("reads polarity words and symbols", () => {
   expect(["+", "Positive", "same"].map(parsePolarity)).toEqual(["+", "+", "+"]);
   expect(["-", "−", "opposite", " Negative "].map(parsePolarity)).toEqual(["-", "-", "-", "-"]);
   expect(["", "?", "maybe"].map(parsePolarity)).toEqual(["", "", ""]);
+});
+
+test("reads the kind of a link", () => {
+  expect(["argument", " Reason ", "evidence"].map(parseKind)).toEqual(["argument", "argument", "argument"]);
+  expect(["", "cause", "whatever"].map(parseKind)).toEqual(["cause", "cause", "cause"]);
 });

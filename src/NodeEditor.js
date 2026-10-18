@@ -8,10 +8,47 @@ import {
   effectsOf,
   findNode,
   findNodeByTitle,
+  isArgument,
   removeConnection,
   renameNode,
   updateConnection,
 } from "./graphOps";
+import { hasPath } from "./loopAnalysis";
+
+const kindOptions = [
+  { value: "cause", label: "Causes", title: "A real-world cause and effect" },
+  { value: "argument", label: "Is a reason for", title: "A reason to believe the other claim" },
+];
+
+function KindPicker({ value, onChange }) {
+  return (
+    <div className="polarity-picker kind-picker" role="radiogroup" aria-label="Kind of link">
+      {kindOptions.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          role="radio"
+          aria-checked={value === option.value}
+          title={option.title}
+          className={value === option.value ? "active" : ""}
+          onClick={() => onChange(option.value)}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// What adding a link from → to would do: close a circular argument, close a
+// loop, or nothing special.
+function loopWarning(graph, from, to, argument) {
+  if (argument && hasPath(graph, to, from, isArgument)) {
+    return { circular: true, text: "This closes a circular argument: the claims would only support each other." };
+  }
+  if (hasPath(graph, to, from)) return { circular: false, text: "↺ This closes a loop." };
+  return null;
+}
 
 const polarityOptions = [
   { value: "+", label: "+ Same", title: "More of the cause means more of the effect" },
@@ -42,8 +79,9 @@ function PolarityPicker({ value, onChange }) {
 function ConnectionEditor({ graph, connection, otherId, updateGraph }) {
   const other = findNode(graph, otherId);
   const { source, target } = connection;
+  const circular = isArgument(connection) && hasPath(graph, target, source, isArgument);
   return (
-    <li className="connection-editor">
+    <li className={`connection-editor ${circular ? "connection-editor-circular" : ""}`}>
       <div className="connection-editor-head">
         <Link to={`/node/${otherId}`}>{other?.title}</Link>
         <button
@@ -55,12 +93,24 @@ function ConnectionEditor({ graph, connection, otherId, updateGraph }) {
           Remove
         </button>
       </div>
-      <PolarityPicker
-        value={connection.polarity || ""}
-        onChange={(polarity) =>
-          updateGraph((g) => updateConnection(g, source, target, { polarity }))
-        }
+      <KindPicker
+        value={connection.kind || "cause"}
+        onChange={(kind) => updateGraph((g) => updateConnection(g, source, target, { kind }))}
       />
+      {isArgument(connection) ? null : (
+        <PolarityPicker
+          value={connection.polarity || ""}
+          onChange={(polarity) =>
+            updateGraph((g) => updateConnection(g, source, target, { polarity }))
+          }
+        />
+      )}
+      {circular ? (
+        <p className="editor-warning" role="status">
+          Part of circular reasoning: through other arguments, this claim ends up
+          supporting itself.
+        </p>
+      ) : null}
       <textarea
         aria-label={`Reasoning for ${other?.title}`}
         placeholder="Why does this lead to that? (optional)"
@@ -77,6 +127,7 @@ function ConnectionEditor({ graph, connection, otherId, updateGraph }) {
 
 function AddConnection({ graph, node, isCause, updateGraph }) {
   const [title, setTitle] = useState("");
+  const [kind, setKind] = useState("cause");
   const listId = `add-${isCause ? "cause" : "effect"}-options`;
   const existing = new Set(
     (isCause ? causesOf(graph, node.id) : effectsOf(graph, node.id)).map((c) =>
@@ -85,6 +136,12 @@ function AddConnection({ graph, node, isCause, updateGraph }) {
   );
   const options = graph.nodes.filter(({ id }) => id !== node.id && !existing.has(id));
   const match = title.trim() ? findNodeByTitle(graph, title) : null;
+  const warning =
+    match && match.id !== node.id
+      ? isCause
+        ? loopWarning(graph, match.id, node.id, kind === "argument")
+        : loopWarning(graph, node.id, match.id, kind === "argument")
+      : null;
 
   const submit = (e) => {
     e.preventDefault();
@@ -94,8 +151,8 @@ function AddConnection({ graph, node, isCause, updateGraph }) {
       let next = g;
       if (!other) [next, other] = addNode(g, title);
       return isCause
-        ? addConnection(next, other.id, node.id)
-        : addConnection(next, node.id, other.id);
+        ? addConnection(next, other.id, node.id, { kind })
+        : addConnection(next, node.id, other.id, { kind });
     });
     setTitle("");
   };
@@ -121,6 +178,12 @@ function AddConnection({ graph, node, isCause, updateGraph }) {
           ))}
         </datalist>
       </label>
+      {title.trim() ? <KindPicker value={kind} onChange={setKind} /> : null}
+      {warning ? (
+        <p className={warning.circular ? "editor-warning" : "editor-note"} role="status">
+          {warning.text}
+        </p>
+      ) : null}
     </form>
   );
 }

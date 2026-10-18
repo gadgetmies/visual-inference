@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { addNode, causesOf, effectsOf, findNodeByTitle } from "./graphOps";
 import OverviewTabs from "./OverviewTabs";
-import { loopsThrough } from "./loopAnalysis";
+import { classifyLoop, loopsThrough, LoopTypes } from "./loopAnalysis";
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
@@ -87,7 +87,9 @@ export default function Overview({ graph, loops, editing, updateGraph, setEditin
           {nodes.map(({ id, title }) => {
             const causes = causesOf(graph, id).length;
             const effects = effectsOf(graph, id).length;
-            const loopCount = loopsThrough(loops.loops, id).length;
+            const nodeLoops = loopsThrough(loops.loops, id);
+            const loopCount = nodeLoops.length;
+            const circular = nodeLoops.some((l) => classifyLoop(l) === LoopTypes.circular);
             return (
               <li key={id}>
                 <Link to={`/node/${id}`} className="node-card">
@@ -98,6 +100,7 @@ export default function Overview({ graph, loops, editing, updateGraph, setEditin
                     {loopCount ? (
                       <span className="tag tag-loop">↺ {plural(loopCount, "loop")}</span>
                     ) : null}
+                    {circular ? <span className="tag tag-circular">Circular reasoning</span> : null}
                   </span>
                 </Link>
               </li>

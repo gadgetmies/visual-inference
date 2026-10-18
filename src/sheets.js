@@ -101,8 +101,19 @@ export function parsePolarity(value = "") {
   return "";
 }
 
+export const LinkKinds = { cause: "cause", argument: "argument" };
+
+// Column E of a connection: is it a cause, or a reason to believe something
+// (an argument)? Anything not recognised as an argument is a cause.
+export function parseKind(value = "") {
+  const v = value.trim().toLowerCase();
+  return ["argument", "reason", "supports", "evidence", "justifies", "because"].includes(v)
+    ? LinkKinds.argument
+    : LinkKinds.cause;
+}
+
 // Builds the graph from raw rows: node rows have the title in the first
-// column, connection rows are [cause, effect, reasoning, polarity]. Nodes that
+// column, connection rows are [cause, effect, reasoning, polarity, kind]. Nodes that
 // are only mentioned in connections are added automatically.
 export function graphFromRows(nodeRows, connectionRows) {
   const nodes = [];
@@ -122,11 +133,12 @@ export function graphFromRows(nodeRows, connectionRows) {
 
   const connections = connectionRows
     .filter((row) => !isBlank(row))
-    .map(([source, target, description = "", polarity = ""]) => ({
+    .map(([source, target, description = "", polarity = "", kind = ""]) => ({
       source: ensureNode(source),
       target: ensureNode(target),
       description: description.trim(),
       polarity: parsePolarity(polarity),
+      kind: parseKind(kind),
     }))
     .filter(({ source, target }) => source !== null && target !== null);
 
@@ -192,11 +204,12 @@ export function graphToTsv({ nodes, connections }) {
   return {
     nodes: toTsv(nodes.map(({ title }) => [title])),
     connections: toTsv(
-      connections.map(({ source, target, description, polarity }) => [
+      connections.map(({ source, target, description, polarity, kind }) => [
         title(source),
         title(target),
         description || "",
         polarity || "",
+        kind || LinkKinds.cause,
       ])
     ),
   };

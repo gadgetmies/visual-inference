@@ -1,5 +1,7 @@
 // Pure helpers for editing a graph. Every function returns a new graph.
 
+export const isArgument = (connection) => connection.kind === "argument";
+
 export const emptyGraph = { nodes: [], connections: [] };
 
 const nextId = (nodes) => nodes.reduce((max, { id }) => Math.max(max, id), -1) + 1;
@@ -41,7 +43,7 @@ export function addConnection(graph, source, target, fields = {}) {
     ...graph,
     connections: [
       ...graph.connections,
-      { description: "", polarity: "", ...fields, source, target },
+      { description: "", polarity: "", kind: "cause", ...fields, source, target },
     ],
   };
 }

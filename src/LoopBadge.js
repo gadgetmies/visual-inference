@@ -1,6 +1,11 @@
 import { LoopTypes } from "./loopAnalysis";
 
 export const loopTypeInfo = {
+  [LoopTypes.circular]: {
+    letter: "!",
+    label: "Circular reasoning",
+    description: "Every link is an argument, so each claim ends up supporting itself.",
+  },
   [LoopTypes.reinforcing]: {
     letter: "R",
     label: "Reinforcing",

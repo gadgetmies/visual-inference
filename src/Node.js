@@ -4,7 +4,7 @@ import Related, { Directions } from "./Related";
 import NodeEditor from "./NodeEditor";
 import LoopCard from "./LoopCard";
 import { causesOf, effectsOf, findNode } from "./graphOps";
-import { loopKey, loopsThrough } from "./loopAnalysis";
+import { loopKey, loopsThrough, sortLoops } from "./loopAnalysis";
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
@@ -35,7 +35,7 @@ export default function Node({
 
   const causes = causesOf(graph, nodeId).length;
   const effects = effectsOf(graph, nodeId).length;
-  const nodeLoops = loopsThrough(loops.loops, nodeId);
+  const nodeLoops = sortLoops(loopsThrough(loops.loops, nodeId)).map(({ loop }) => loop);
   const highlighted = nodeLoops.find((loop) => loopKey(loop) === highlightedKey);
   const highlight = highlighted
     ? new Set(highlighted.connections.map((c) => `${c.source}>${c.target}`))

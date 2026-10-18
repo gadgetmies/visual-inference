@@ -2,13 +2,13 @@ import { useState } from "react";
 import LoopCard from "./LoopCard";
 import OverviewTabs from "./OverviewTabs";
 import { loopTypeInfo } from "./LoopBadge";
-import { classifyLoop, loopKey, LoopTypes, MAX_LOOP_LENGTH, MAX_LOOPS } from "./loopAnalysis";
+import { loopKey, LoopTypes, MAX_LOOP_LENGTH, MAX_LOOPS, sortLoops } from "./loopAnalysis";
 
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
 
 export default function Loops({ graph, loops: { loops, truncated } }) {
   const [filter, setFilter] = useState(null);
-  const typed = loops.map((loop) => ({ loop, type: classifyLoop(loop) }));
+  const typed = sortLoops(loops);
   const types = Object.values(LoopTypes).filter((type) => typed.some((t) => t.type === type));
   const shown = filter ? typed.filter(({ type }) => type === filter) : typed;
 
@@ -84,6 +84,10 @@ export default function Loops({ graph, loops: { loops, truncated } }) {
         <strong>reinforcing</strong>: it amplifies itself, as a virtuous or vicious
         circle. An odd number makes it <strong>balancing</strong>: it pushes back towards
         a limit. Loops with links that have no + or − are unclassified.
+        <br />
+        Links marked as an <strong>argument</strong> in column E (“is a reason to
+        believe”) are not causes. A loop made only of arguments is{" "}
+        <strong>circular reasoning</strong>: each claim ends up supporting itself.
       </aside>
     </main>
   );

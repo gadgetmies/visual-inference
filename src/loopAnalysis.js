@@ -85,6 +85,7 @@ export function hasPath(graph, from, to, accept = () => true) {
 export const loopKey = (loop) => loop.connections.map((c) => `${c.source}>${c.target}`).join(",");
 
 export const LoopTypes = {
+  circular: "circular",
   reinforcing: "reinforcing",
   balancing: "balancing",
   unknown: "unknown",
@@ -92,10 +93,25 @@ export const LoopTypes = {
 
 // A loop with an even number of opposite (−) links amplifies itself
 // (reinforcing); an odd number pushes back towards a limit (balancing).
+// A loop made only of argument links ("is a reason to believe") is circular
+// reasoning: each claim ends up supporting itself.
 export function classifyLoop(loop) {
+  if (loop.connections.every((c) => c.kind === "argument")) return LoopTypes.circular;
   if (loop.connections.some((c) => c.polarity !== "+" && c.polarity !== "-")) {
     return LoopTypes.unknown;
   }
   const negatives = loop.connections.filter((c) => c.polarity === "-").length;
   return negatives % 2 === 0 ? LoopTypes.reinforcing : LoopTypes.balancing;
 }
+
+const typeOrder = Object.values(LoopTypes);
+
+// Circular reasoning first, then by type and length.
+export const sortLoops = (loops) =>
+  loops
+    .map((loop) => ({ loop, type: classifyLoop(loop) }))
+    .sort(
+      (a, b) =>
+        typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type) ||
+        a.loop.nodes.length - b.loop.nodes.length
+    );

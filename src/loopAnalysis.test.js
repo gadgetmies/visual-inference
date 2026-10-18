@@ -1,4 +1,12 @@
-import { classifyLoop, findLoops, hasPath, LoopTypes, loopsThrough, rotateLoop } from "./loopAnalysis";
+import {
+  classifyLoop,
+  findLoops,
+  hasPath,
+  LoopTypes,
+  loopsThrough,
+  rotateLoop,
+  sortLoops,
+} from "./loopAnalysis";
 import exampleGraph from "./exampleGraph";
 
 const graph = (edges) => ({
@@ -66,11 +74,34 @@ test("classifies loops by the number of opposite links", () => {
   expect(classifyLoop(loop("-", "+", "-"))).toBe(LoopTypes.reinforcing);
   expect(classifyLoop(loop("+", "-"))).toBe(LoopTypes.balancing);
   expect(classifyLoop(loop("+", ""))).toBe(LoopTypes.unknown);
+  const argumentLoop = (...kinds) => ({ connections: kinds.map((kind) => ({ kind, polarity: "+" })) });
+  expect(classifyLoop(argumentLoop("argument", "argument"))).toBe(LoopTypes.circular);
+  expect(classifyLoop(argumentLoop("argument", "cause"))).toBe(LoopTypes.reinforcing);
 });
 
 test("the example has both reinforcing and balancing loops", () => {
   const types = findLoops(exampleGraph).loops.map(classifyLoop);
   expect(types).toContain(LoopTypes.reinforcing);
   expect(types).toContain(LoopTypes.balancing);
+  expect(types).toContain(LoopTypes.circular);
   expect(types).not.toContain(LoopTypes.unknown);
+});
+
+test("lists circular reasoning first", () => {
+  const sorted = sortLoops(findLoops(exampleGraph).loops);
+  expect(sorted[0].type).toBe(LoopTypes.circular);
+});
+
+test("finds paths along argument links only", () => {
+  const g = {
+    nodes: [0, 1, 2].map((id) => ({ id, title: `${id}` })),
+    connections: [
+      { source: 0, target: 1, kind: "argument" },
+      { source: 1, target: 2, kind: "cause" },
+    ],
+  };
+  const isArgument = (c) => c.kind === "argument";
+  expect(hasPath(g, 0, 2)).toBe(true);
+  expect(hasPath(g, 0, 2, isArgument)).toBe(false);
+  expect(hasPath(g, 0, 1, isArgument)).toBe(true);
 });

@@ -1,5 +1,6 @@
 // Example: how protected bike lanes ripple through a city.
 // polarity "+": more of the cause means more of the effect; "-": less.
+// kind "argument": a reason to believe the other claim rather than a cause.
 const exampleGraph = {
   nodes: [
     { id: 0, title: "Protected bike lanes" },
@@ -20,6 +21,8 @@ const exampleGraph = {
     { id: 15, title: "Physical activity" },
     { id: 16, title: "Household transport costs" },
     { id: 17, title: "Crowding on bike lanes" },
+    { id: 18, title: "The cycling scheme is working" },
+    { id: 19, title: "The council’s cycling plan is right" },
   ],
   connections: [
     {
@@ -198,6 +201,25 @@ const exampleGraph = {
       target: 17,
       polarity: "-",
       description: "More lane space spreads riders out.",
+    },
+    {
+      source: 2,
+      target: 18,
+      kind: "argument",
+      description: "Rising cycling counts are evidence that the scheme works.",
+    },
+    {
+      source: 18,
+      target: 19,
+      kind: "argument",
+      description: "If the scheme works, the plan behind it must be right.",
+    },
+    {
+      source: 19,
+      target: 18,
+      kind: "argument",
+      description:
+        "…and the scheme must be working because the plan is right. Circular: each claim only rests on the other.",
     },
   ],
 };

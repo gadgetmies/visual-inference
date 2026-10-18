@@ -37,11 +37,18 @@ export default function LoopCard({ graph, loop, startId, highlighted = false, on
               {title(id)}
             </Link>
             <span
-              className={`loop-step loop-step-${shown.connections[index].polarity || "unknown"}`}
-              aria-label={`leads to (${signName[shown.connections[index].polarity] || "direction unknown"})`}
+              className={`loop-step loop-step-${shown.connections[index].polarity || "unknown"} ${
+                shown.connections[index].kind === "argument" ? "loop-step-argument" : ""
+              }`}
+              aria-label={
+                shown.connections[index].kind === "argument"
+                  ? "is a reason to believe"
+                  : `leads to (${signName[shown.connections[index].polarity] || "direction unknown"})`
+              }
             >
-              →
-              {signLabel[shown.connections[index].polarity] ? (
+              {shown.connections[index].kind === "argument" ? "supports" : "→"}
+              {shown.connections[index].kind !== "argument" &&
+              signLabel[shown.connections[index].polarity] ? (
                 <span className="loop-step-sign">
                   {signLabel[shown.connections[index].polarity]}
                 </span>

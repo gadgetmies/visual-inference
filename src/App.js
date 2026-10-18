@@ -129,7 +129,8 @@ function App() {
           <div className="example-banner">
             <span>
               You’re viewing an example about city cycling. Pick a node to see what
-              causes it and what it leads to.
+              causes it and what it leads to, or open <Link to="/loops">Loops</Link> to
+              see the circles of cause and effect.
             </span>
             <Link to="/settings" className="button button-small button-primary">
               Use your own sheet
