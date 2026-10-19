@@ -11,6 +11,7 @@ export default function LoopCard({ graph, loop, startId, highlighted = false, on
   const shown = startId === undefined ? loop : rotateLoop(loop, startId);
   const title = (id) => findNode(graph, id)?.title || "?";
   const steps = shown.nodes.length;
+  const unsupported = shown.connections.filter((c) => !c.evidence).length;
 
   return (
     <li className={`loop-card ${highlighted ? "loop-card-highlighted" : ""}`}>
@@ -19,6 +20,18 @@ export default function LoopCard({ graph, loop, startId, highlighted = false, on
         <span className="loop-card-length">
           {steps === 1 ? "Leads to itself" : `${steps} steps`}
         </span>
+        {unsupported ? (
+          <span
+            className="loop-card-unsupported"
+            title="A loop is only as strong as its weakest link."
+          >
+            {unsupported === steps
+              ? "No link cites evidence"
+              : `${unsupported} of ${steps} links cite no evidence`}
+          </span>
+        ) : (
+          <span className="loop-card-supported">Every link cites evidence</span>
+        )}
         {onToggle ? (
           <button
             type="button"

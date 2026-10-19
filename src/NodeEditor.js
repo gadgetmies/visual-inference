@@ -113,12 +113,21 @@ function ConnectionEditor({ graph, connection, otherId, updateGraph }) {
       ) : null}
       <textarea
         aria-label={`Reasoning for ${other?.title}`}
-        placeholder="Why does this lead to that? (optional)"
+        placeholder="Reasoning: why does this lead to that?"
         value={connection.description || ""}
         onChange={(e) =>
           updateGraph((g) =>
             updateConnection(g, source, target, { description: e.target.value })
           )
+        }
+      />
+      <textarea
+        className="evidence-input"
+        aria-label={`Evidence for ${other?.title}`}
+        placeholder="Evidence: links or sources, one per line"
+        value={connection.evidence || ""}
+        onChange={(e) =>
+          updateGraph((g) => updateConnection(g, source, target, { evidence: e.target.value }))
         }
       />
     </li>

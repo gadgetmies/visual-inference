@@ -43,7 +43,7 @@ export function addConnection(graph, source, target, fields = {}) {
     ...graph,
     connections: [
       ...graph.connections,
-      { description: "", polarity: "", kind: "cause", ...fields, source, target },
+      { description: "", polarity: "", kind: "cause", evidence: "", ...fields, source, target },
     ],
   };
 }

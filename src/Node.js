@@ -3,6 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import Related, { Directions } from "./Related";
 import NodeEditor from "./NodeEditor";
 import LoopCard from "./LoopCard";
+import ConnectorLayer from "./ConnectorLayer";
+import ConnectionDetails from "./ConnectionDetails";
 import { causesOf, effectsOf, findNode } from "./graphOps";
 import { loopKey, loopsThrough, sortLoops } from "./loopAnalysis";
 
@@ -56,6 +58,9 @@ export default function Node({
     <main className={`node-view ${editing ? "node-view-editing" : ""}`}>
       <div className="node-main">
         <div className="node-graph">
+          <ConnectorLayer
+            deps={[graph, nodeId, highlightedKey, editing, sourceLevels, targetLevels]}
+          />
           <section className="column column-causes" aria-label="Causes">
             <h2 className="column-label label-cause">Causes</h2>
             {causes ? (
@@ -66,7 +71,10 @@ export default function Node({
           </section>
           <section className="column column-focus" aria-label="Selected node">
             <h2 className="column-label">Focus</h2>
-            <div className={`focus-card ${highlight ? "focus-card-highlighted" : ""}`}>
+            <div
+              className={`focus-card ${highlight ? "focus-card-highlighted" : ""}`}
+              data-node-key="focus"
+            >
               <h1>{node.title}</h1>
               <p>
                 {plural(causes, "cause")} · {plural(effects, "effect")}
@@ -83,6 +91,8 @@ export default function Node({
             )}
           </section>
         </div>
+
+        <ConnectionDetails graph={graph} node={node} />
 
         {nodeLoops.length ? (
           <section className="node-loops" aria-labelledby="node-loops-title">

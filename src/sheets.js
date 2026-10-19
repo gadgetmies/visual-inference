@@ -113,7 +113,8 @@ export function parseKind(value = "") {
 }
 
 // Builds the graph from raw rows: node rows have the title in the first
-// column, connection rows are [cause, effect, reasoning, polarity, kind]. Nodes that
+// column, connection rows are [cause, effect, reasoning, polarity, kind,
+// evidence]. Nodes that
 // are only mentioned in connections are added automatically.
 export function graphFromRows(nodeRows, connectionRows) {
   const nodes = [];
@@ -133,12 +134,13 @@ export function graphFromRows(nodeRows, connectionRows) {
 
   const connections = connectionRows
     .filter((row) => !isBlank(row))
-    .map(([source, target, description = "", polarity = "", kind = ""]) => ({
+    .map(([source, target, description = "", polarity = "", kind = "", evidence = ""]) => ({
       source: ensureNode(source),
       target: ensureNode(target),
       description: description.trim(),
       polarity: parsePolarity(polarity),
       kind: parseKind(kind),
+      evidence: evidence.trim(),
     }))
     .filter(({ source, target }) => source !== null && target !== null);
 
@@ -204,12 +206,13 @@ export function graphToTsv({ nodes, connections }) {
   return {
     nodes: toTsv(nodes.map(({ title }) => [title])),
     connections: toTsv(
-      connections.map(({ source, target, description, polarity, kind }) => [
+      connections.map(({ source, target, description, polarity, kind, evidence }) => [
         title(source),
         title(target),
         description || "",
         polarity || "",
         kind || LinkKinds.cause,
+        evidence || "",
       ])
     ),
   };

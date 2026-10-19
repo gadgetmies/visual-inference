@@ -21,7 +21,7 @@ test("edits a graph immutably", () => {
 
   g = updateConnection(g, a.id, b.id, { description: "because", polarity: "-" });
   expect(g.connections).toEqual([
-    { source: 0, target: 1, description: "because", polarity: "-", kind: "cause" },
+    { source: 0, target: 1, description: "because", polarity: "-", kind: "cause", evidence: "" },
   ]);
 
   g = renameNode(g, b.id, "Bee");

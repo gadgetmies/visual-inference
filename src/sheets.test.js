@@ -25,15 +25,22 @@ test("builds a graph and adds nodes only named in connections", () => {
   const graph = graphFromRows(
     [["Rain"], [""]],
     [
-      ["Rain", "Wet streets", "Water falls", "+"],
+      ["Rain", "Wet streets", "Water falls", "+", "", "Met Office https://example.org"],
       ["Wet streets", "Slipping", "", "", "Argument"],
       ["", ""],
     ]
   );
   expect(graph.nodes.map((n) => n.title)).toEqual(["Rain", "Wet streets", "Slipping"]);
   expect(graph.connections).toEqual([
-    { source: 0, target: 1, description: "Water falls", polarity: "+", kind: "cause" },
-    { source: 1, target: 2, description: "", polarity: "", kind: "argument" },
+    {
+      source: 0,
+      target: 1,
+      description: "Water falls",
+      polarity: "+",
+      kind: "cause",
+      evidence: "Met Office https://example.org",
+    },
+    { source: 1, target: 2, description: "", polarity: "", kind: "argument", evidence: "" },
   ]);
 });
 
@@ -46,7 +53,7 @@ test("exports TSV that pastes into Sheets", () => {
     connections: [{ source: 0, target: 1, description: 'says "hi"\tthere', polarity: "-" }],
   });
   expect(tsv.nodes).toBe("A\nB");
-  expect(tsv.connections).toBe('A\tB\t"says ""hi""\tthere"\t-\tcause');
+  expect(tsv.connections).toBe('A\tB\t"says ""hi""\tthere"\t-\tcause\t');
 });
 
 test("reads polarity words and symbols", () => {
