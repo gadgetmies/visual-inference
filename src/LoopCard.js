@@ -29,18 +29,37 @@ function NodeChip({ id, title, change, isArgument, isReturn }) {
   );
 }
 
-function verdict(type, start, final) {
+const listText = (items) =>
+  items.length <= 1
+    ? items.join("")
+    : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+
+// A sentence specific to this loop: which nodes the change passes through and
+// how it comes back.
+function verdict(type, shown, changes, title) {
+  const start = title(shown.nodes[0]);
+  const steps = shown.nodes.length;
+  const final = changes[steps];
+  const middle = shown.nodes
+    .slice(1)
+    .map((id, i) => `${changeWord[changes[i + 1]]} ${title(id)}`);
+  const through = middle.length ? `through ${listText(middle)}` : "directly";
+
   switch (type) {
     case LoopTypes.circular:
-      return `Each claim rests only on the others: nothing outside the loop supports ${start}.`;
+      return `${listText(shown.nodes.map(title))} only support each other: nothing outside this loop backs them up.`;
     case LoopTypes.reinforcing:
-      return `Starting from more ${start}, the chain comes back to more ${start}: every round amplifies the change, as a virtuous or vicious circle.`;
+      return `More ${start} leads ${through}, back to more ${start}. The change feeds itself.`;
     case LoopTypes.balancing:
-      return `Starting from more ${start}, the chain comes back to less ${start}: the loop pushes back against the change.`;
-    default:
+      return `More ${start} leads ${through}, back to less ${start}. The loop holds ${start} back.`;
+    default: {
+      const gap = shown.connections.findIndex((c) => c.polarity !== "+" && c.polarity !== "-");
+      const from = title(shown.nodes[gap]);
+      const to = title(shown.nodes[(gap + 1) % steps]);
       return final === Change.unknown
-        ? "Some links don’t say whether they work in the same or the opposite direction, so the outcome is unknown."
+        ? `The link from ${from} to ${to} doesn’t say whether it works in the same or the opposite direction, so it is unknown how this loop behaves.`
         : "";
+    }
   }
 }
 
@@ -125,7 +144,7 @@ export default function LoopCard({ graph, loop, startId, highlighted = false, on
       </p>
 
       <p className={`loop-verdict loop-verdict-${type}`}>
-        {verdict(type, title(shown.nodes[0]), changes[steps])}
+        {verdict(type, shown, changes, title)}
       </p>
 
       {explained ? (
