@@ -89,7 +89,9 @@ export default function ConnectorLayer({ deps }) {
         // fanning out of one card bunch together.
         const t = side === "cause" ? 0.25 : 0.75;
         const [mx, my] = bezierPoint(t, [sx, sy], [sx + bend, sy], [ex - bend, ey], [ex, ey]);
-        const sign = kind === "argument" ? null : polarity === "+" ? "+" : polarity === "-" ? "−" : null;
+        // ▲▲: more of the cause means more of the effect; ▲▼: it means less.
+        const sign =
+          kind === "argument" ? null : polarity === "+" ? "▲▲" : polarity === "-" ? "▲▼" : null;
         return (
           <g key={key} className={`connector connector-${type} ${kind === "argument" ? "connector-argument" : ""}`}>
             <path
@@ -98,8 +100,13 @@ export default function ConnectorLayer({ deps }) {
             />
             {sign ? (
               <g className="connector-sign" transform={`translate(${mx} ${my})`}>
-                <circle r="8" />
-                <text dy="0.35em">{sign}</text>
+                <rect x="-14" y="-9" width="28" height="18" rx="9" />
+                <text dy="0.35em">
+                  <tspan className="connector-up">▲</tspan>
+                  <tspan className={polarity === "+" ? "connector-up" : "connector-down"}>
+                    {polarity === "+" ? "▲" : "▼"}
+                  </tspan>
+                </text>
               </g>
             ) : null}
           </g>

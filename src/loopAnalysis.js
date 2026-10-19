@@ -115,3 +115,24 @@ export const sortLoops = (loops) =>
         typeOrder.indexOf(a.type) - typeOrder.indexOf(b.type) ||
         a.loop.nodes.length - b.loop.nodes.length
     );
+
+export const Change = { up: 1, down: -1, unknown: 0 };
+
+// Follows one change around the loop: starting with "more" of the first node,
+// what happens to each next node? "+" links pass the change on unchanged, "-"
+// links reverse it, and after a link without a direction it is unknown.
+// Returns one change per node plus the change that arrives back at the start.
+export function traceLoop(loop) {
+  const changes = [Change.up];
+  loop.connections.forEach(({ polarity }, i) => {
+    const current = changes[i];
+    changes.push(
+      current === Change.unknown || (polarity !== "+" && polarity !== "-")
+        ? Change.unknown
+        : polarity === "+"
+        ? current
+        : -current
+    );
+  });
+  return changes;
+}

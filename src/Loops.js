@@ -78,12 +78,14 @@ export default function Loops({ graph, loops: { loops, truncated } }) {
       )}
 
       <aside className="hint loop-legend">
-        <strong>How loops are classified.</strong> Each link is <strong>+</strong> when
-        more of the cause means more of the effect, or <strong>−</strong> when it means
-        less (column D of the connections tab). A loop with an even number of − links is{" "}
+        <strong>How to read a loop.</strong> Each loop follows one change around the
+        circle: it starts with <strong>▲ more</strong> of the first node and shows what
+        happens to each next one. A link marked + in the sheet (column D) passes the
+        change on (more → more, less → less); a link marked − reverses it (more → less,
+        less → more). If the change comes back as more, the loop is{" "}
         <strong>reinforcing</strong>: it amplifies itself, as a virtuous or vicious
-        circle. An odd number makes it <strong>balancing</strong>: it pushes back towards
-        a limit. Loops with links that have no + or − are unclassified.
+        circle. If it comes back as less, the loop is <strong>balancing</strong>: it
+        pushes back. Loops with links that have no + or − are unclassified.
         <br />
         Links marked as an <strong>argument</strong> in column E (“is a reason to
         believe”) are not causes. A loop made only of arguments is{" "}

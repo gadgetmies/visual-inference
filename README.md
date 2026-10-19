@@ -26,17 +26,19 @@ Add `?sheet=<sheet id>` to the app URL (optionally `&nodes=<tab>&connections=<ta
 
 ## Reading a node
 
-Arrows run from cause to effect and connect each card to the one it affects. Each card states its claim (`▲ more → ▼ less`: more of the cause means less of the effect) and shows whether its link cites evidence. Below the graph, **How it connects** lists every direct link of the node with its full claim ("More People cycling means less Car trips"), the reasoning, and the evidence, and points out links that have none.
+Arrows run from cause to effect and connect each card to the one it affects. Each card states its claim (`▲ more → ▼ less`: more of the cause means less of the effect; the marker on the arrow shows the same as ▲▲ or ▲▼) and shows whether its link cites evidence. Below the graph, **How it connects** lists every direct link of the node with its full claim ("More People cycling means less Car trips"), the reasoning, and the evidence, and points out links that have none.
 
 ## Loops
 
 The **Loops** tab lists every chain of effects that leads back to where it started (up to 8 steps), and each node page lists the loops through that node. **Show in graph** highlights a loop's links. Each loop says how many of its links cite no evidence: a loop is only as strong as its weakest link.
 
+Each loop is read by following one change around it: it starts with **▲ more** of the first node and shows what happens to each next node. A `+` link passes the change on (more → more, less → less) and a `-` link reverses it (more → less, less → more). For example: ▲ more People cycling → ▼ less Car trips → ▼ less Road injuries → ▲ more Perceived cycling safety → ▲ more People cycling. Coming back as "more" makes the loop reinforcing. **Show reasoning** spells out every step with its reasoning and evidence.
+
 | Type | When | Meaning |
 | --- | --- | --- |
 | **Circular reasoning** | every link in the loop is an `argument` | each claim ends up supporting itself |
-| **Reinforcing** | an even number of `-` links | the loop amplifies itself: a virtuous or vicious circle |
-| **Balancing** | an odd number of `-` links | the loop pushes back towards a limit |
+| **Reinforcing** | the change comes back the same (an even number of `-` links) | the loop amplifies itself: a virtuous or vicious circle |
+| **Balancing** | the change comes back reversed (an odd number of `-` links) | the loop pushes back towards a limit |
 | **Unclassified** | some link has no `+` or `-` | add directions in column D to classify it |
 
 While editing, the panel warns when a new link would close a loop or a circular argument.

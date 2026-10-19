@@ -6,6 +6,7 @@ import {
   loopsThrough,
   rotateLoop,
   sortLoops,
+  traceLoop,
 } from "./loopAnalysis";
 import exampleGraph from "./exampleGraph";
 
@@ -104,4 +105,12 @@ test("finds paths along argument links only", () => {
   expect(hasPath(g, 0, 2)).toBe(true);
   expect(hasPath(g, 0, 2, isArgument)).toBe(false);
   expect(hasPath(g, 0, 1, isArgument)).toBe(true);
+});
+
+test("traces a change around a loop", () => {
+  const loop = (...polarities) => ({ connections: polarities.map((polarity) => ({ polarity })) });
+  // More cycling → less car trips → less injuries → more safety → more cycling.
+  expect(traceLoop(loop("-", "+", "-", "+"))).toEqual([1, -1, -1, 1, 1]);
+  expect(traceLoop(loop("+", "-"))).toEqual([1, 1, -1]);
+  expect(traceLoop(loop("+", "", "+"))).toEqual([1, 1, 0, 0]);
 });

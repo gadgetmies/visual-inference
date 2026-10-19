@@ -1102,8 +1102,11 @@
   min-height: 34px;
 }
 
-.loop-card-head .button {
+.loop-card-actions {
   margin-left: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 .loop-card-length {
@@ -1689,4 +1692,101 @@
   background: var(--surface-muted);
   border: 1px solid var(--line);
   font-weight: 600;
+}
+
+/* ---------- Loops as traced changes ---------- */
+
+.loop-change {
+  font-size: 11px;
+  font-weight: 700;
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.loop-node-up .loop-change {
+  color: var(--loop);
+}
+
+.loop-node-down .loop-change {
+  color: var(--balancing);
+}
+
+.loop-node-unknown .loop-change {
+  color: var(--ink-muted);
+}
+
+.loop-node-return.loop-node-up {
+  border-color: var(--loop);
+}
+
+.loop-node-return.loop-node-down {
+  border-color: var(--balancing);
+  color: var(--balancing);
+}
+
+.loop-verdict {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.loop-verdict-circular {
+  color: var(--danger);
+}
+
+.loop-steps {
+  margin: 4px 0 0;
+  padding: 12px 0 0 22px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.loop-explain p {
+  margin: 0;
+}
+
+.loop-explain-claim {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.loop-explain-reason {
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.loop-explain .evidence {
+  font-size: 13px;
+}
+
+.connector-sign rect {
+  fill: var(--bg);
+  stroke-width: 1.25;
+}
+
+.connector-cause .connector-sign rect {
+  stroke: var(--cause);
+}
+
+.connector-effect .connector-sign rect {
+  stroke: var(--effect);
+}
+
+.connector-highlight .connector-sign rect {
+  stroke: var(--loop);
+}
+
+.connector-sign text {
+  font-size: 9px;
+  letter-spacing: 1px;
+}
+
+.connector-sign .connector-up {
+  fill: var(--loop);
+}
+
+.connector-sign .connector-down {
+  fill: var(--balancing);
 }
